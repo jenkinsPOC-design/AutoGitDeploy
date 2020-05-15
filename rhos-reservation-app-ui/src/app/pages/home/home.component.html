@@ -1,0 +1,204 @@
+<div class="container">
+    <div class="row home-row">
+        <div class="col-8 body-info">
+            <h1>Book your destination right now.</h1>
+            <p>A one stop to manage your destination travels.</p>
+            <button id="book-ticket-btn" class="btn btn-info action-button" type="button" 
+            (click)="openModal(operationModal,'bookTicketItem')">Book Ticket</button>
+        </div>
+        <div class="col-4">
+            <img class="landing-image" alt="Train Image 1" src="assets/img/travel.svg" />
+        </div>
+    </div>
+    <app-footer></app-footer>    
+</div>
+<ng-template #operationModal>
+    <div [ngSwitch]="eventMessage">
+        <div *ngSwitchCase="'cancelTicketItem'">
+            <div class="modal-header">
+                <h5 class="modal-title pull-left">Cancel Ticket</h5>
+                <button type="button" class="close pull-right" aria-label="Close" (click)="closeModal()">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form *ngIf="bookingData">
+                    <div *ngIf="alertMessage" class="alert alert-danger" role="alert">
+                       {{ alertMessage }}.
+                    </div>
+                    <fieldset>
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <input class="form-control custom-input" type="text"  name="bookingId" [(ngModel)]="bookingData.bookingId" required placeholder="PNR Number">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <input class="form-control btn btn-primary btn-sm" type="submit"  name="submit" (click) ="cancelTicket(bookingData)" value="Cancel Ticket">
+                </form>
+            </div>
+        </div>
+        <div *ngSwitchCase="'pnrStatusItem'">
+            <div class="modal-header">
+                <h5 class="modal-title pull-left">Get PNR Status</h5>
+                <button type="button" class="close pull-right" aria-label="Close" (click)="closeModal()">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form *ngIf="bookingData">
+                    <div *ngIf="alertMessage" class="alert alert-danger" role="alert">
+                        {{ alertMessage }}.
+                    </div>
+                    <fieldset>
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <input class="form-control custom-input" type="text"  name="bookingId" [(ngModel)]="bookingData.bookingId" required placeholder="PNR Number">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <input class="form-control btn btn-primary btn-sm" type="submit"  name="submit" (click) ="getPnrStatus(bookingData)" value="Get Status">
+                </form>
+            </div>
+        </div>
+        <div *ngSwitchDefault>
+            <div class="modal-header">
+                <h5 class="modal-title pull-left">Book Ticket</h5>
+                <button type="button" class="close pull-right" aria-label="Close" (click)="closeModal()">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form *ngIf="bookingData">
+                    <div *ngIf="alertMessage" class="alert alert-danger" role="alert">
+                        {{ alertMessage }}.
+                    </div>
+                    <div *ngIf="bookingData.fromStation && bookingData.toStation && bookingData.fromStation === bookingData.toStation" class="alert alert-danger" role="alert">
+                        Journey from and to cannot be the same.
+                    </div>
+                    <fieldset>
+                        <legend class="custom-legend">Journey Details:</legend>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <label class="sr-only">From</label>
+                                    <select [(ngModel)]="bookingData.fromStation" class="form-control custom-input" id="From station" name="fromStation" required>
+                                        <option disabled value>From Station</option>
+                                        <option *ngFor="let station of rawData.stations" [ngValue]="station">{{station}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <label class="sr-only">To</label>
+                                    <select [(ngModel)]="bookingData.toStation" class="form-control custom-input" id="To station" name="toStation" required>
+                                        <option disabled value>To Station</option>
+                                        <option *ngFor="let station of rawData.stations" [ngValue]="station">{{station}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <label class="sr-only">Available Trains</label>
+                                    <select [disabled]="!((bookingData.fromStation && bookingData.toStation) && (bookingData.fromStation !== bookingData.toStation))" class="form-control custom-input" id="selectedTrain" name="selectedTrain" required [(ngModel)]="bookingData.selectedTrain">
+                                        <option disabled value>Available Trains</option>
+                                        <option *ngFor="let trainType of rawData.trainTypeList" [ngValue]="trainType">{{ bookingData.fromStation }} - {{ bookingData.toStation }} {{trainType}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <label class="sr-only">Journey date</label>
+                                    <input type="text" placeholder="Journey date" name="journeyDate" [(ngModel)]="bookingData.journeyDate" onfocus="this.value=''" class="form-control custom-input" bsDatepicker>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <hr />
+                    <fieldset>
+                        <legend class="custom-legend">Personal Details:</legend>
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <label class="sr-only">First Name</label>
+                                    <input class="form-control custom-input" type="text" name="firstName" [(ngModel)]="bookingData.firstName" required placeholder="First Name">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <label class="sr-only">Last Name</label>
+                                    <input class="form-control custom-input" type="text"  name="lastName" [(ngModel)]="bookingData.lastName" required placeholder="Last Name">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <label class="sr-only">Email</label>
+                                    <input class="form-control custom-input" type="email" name="email" [(ngModel)]="bookingData.email" required placeholder="Email">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <input class="form-control btn btn-primary btn-sm" type="submit"  name="submit" (click) ="bookTicket(bookingData)" value="Book My Ticket">
+                </form>
+            </div>
+        </div>
+    </div>        
+</ng-template>
+<ng-template #resultModal>
+    <div class="modal-body text-center">
+        <div *ngIf="!errorFlag; else failureMessage">
+            <div [ngSwitch]="eventMessage">
+                <div *ngSwitchCase="'pnrStatusItem'">
+                    <h4>PNR Status</h4>
+                    <hr />
+                    <p>Status : {{ bookingData.pnrStatus }}</p>
+                </div>
+                <div *ngSwitchCase="'cancelTicketItem'">
+                    <h4>Cancelled</h4>
+                    <hr />
+                    <p>Your ticket has been cancelled successfully.</p>
+                </div>
+                <div *ngSwitchDefault>
+                    <h4>Confirmed</h4>
+                    <hr />
+                    <p>Your ticket has been booked successfully.</p>
+                    <div>
+                        <p><strong>Ticket No : {{ bookingData.ticketNo }}</strong></p>
+                        <p><strong>PNR No : {{ bookingData.bookingId }}</strong></p>
+                        <p><strong>PNR Status : {{ bookingData.pnrStatus }}</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ng-template #failureMessage>
+            <div [ngSwitch]="eventMessage">
+                <div *ngSwitchCase="'pnrStatusItem'">
+                    <h4>{{ resultMessage ? resultMessage : 'Failed' }}</h4>
+                    <hr />
+                    <p>Please Try again.</p>
+                </div>
+                <div *ngSwitchCase="'cancelTicketItem'">
+                    <h4>{{ resultMessage ? resultMessage : 'Cancellation Failed' }}</h4>
+                    <hr />
+                    <p>Please Try again.</p>
+                </div>
+                <div *ngSwitchDefault>
+                    <h4>Booking Failed</h4>
+                    <hr />
+                    <p>Please Try again.</p>
+                </div>
+            </div>
+        </ng-template>
+        <button [ngClass]="{'form-control': true, 'btn': true, 'btn-success': !errorFlag, 'btn-danger': errorFlag }" 
+        (click)="closeModal()"><span>Close</span></button>
+    </div>
+</ng-template>
